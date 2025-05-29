@@ -1,3 +1,52 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'hook__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /* fftw hook to be used in the benchmark program.  
    
    We keep it in a separate file because 
@@ -200,7 +249,7 @@ static void hook(planner *plnr, plan *pln, const problem *p_, int optimalp)
 
      if (verbose > 5) {
 	  printer *pr = X(mkprinter_file)(stdout);
-	  pr->print(pr, "%P:%(%p%)\n", p_, pln);
+	  LORELIB_CFI_27(pr->print)(pr, "%P:%(%p%)\n", p_, pln);
 	  X(printer_destroy)(pr);
 	  printf("cost %g  \n\n", pln->pcost);
      }
@@ -257,3 +306,9 @@ void uninstall_hook(void)
      planner *plnr = X(the_planner)();
      plnr->hook = 0;
 }
+
+//
+// Original code end
+//
+
+

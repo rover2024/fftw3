@@ -1,3 +1,52 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'trig__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (struct triggen_s *, long, double *)
+#define LORELIB_CFI_31(FP) LORELIB_CFI(31, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -153,7 +202,7 @@ static void cexpl_zero(triggen *p, INT m, trigreal *res)
 static void cexp_generic(triggen *p, INT m, R *res)
 {
      trigreal resl[2];
-     p->cexpl(p, m, resl);
+     LORELIB_CFI_31(p->cexpl)(p, m, resl);
      res[0] = (R)resl[0];
      res[1] = (R)resl[1];
 }
@@ -161,7 +210,7 @@ static void cexp_generic(triggen *p, INT m, R *res)
 static void rotate_generic(triggen *p, INT m, R xr, R xi, R *res)
 {
      trigreal w[2];
-     p->cexpl(p, m, w);
+     LORELIB_CFI_31(p->cexpl)(p, m, w);
      res[0] = xr * w[0] - xi * (FFT_SIGN * w[1]);
      res[1] = xi * w[0] + xr * (FFT_SIGN * w[1]);
 }
@@ -232,3 +281,9 @@ void X(triggen_destroy)(triggen *p)
      X(ifree0)(p->W1);
      X(ifree)(p);
 }
+
+//
+// Original code end
+//
+
+

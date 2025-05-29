@@ -1,3 +1,58 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'hc2hc-direct__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *)
+#define LORELIB_CFI_6(FP) LORELIB_CFI(6, FP)
+
+// decl: void (double *, double *, const double *, long *, long, long, long)
+#define LORELIB_CFI_13(FP) LORELIB_CFI(13, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -52,10 +107,10 @@ static void apply(const plan *ego_, R *IO)
      INT ms = ego->ms, vs = ego->vs;
 
      for (i = 0; i < v; ++i, IO += vs) {
-	  cld0->apply((plan *) cld0, IO, IO);
-	  ego->k(IO + ms * mb, IO + (m - mb) * ms, 
+	  LORELIB_CFI_6(cld0->apply)((plan *) cld0, IO, IO);
+	  LORELIB_CFI_13(ego->k)(IO + ms * mb, IO + (m - mb) * ms, 
 		 ego->td->W, ego->rs, mb, me, ms);
-	  cldm->apply((plan *) cldm, IO + (m/2) * ms, IO + (m/2) * ms);
+	  LORELIB_CFI_6(cldm->apply)((plan *) cldm, IO + (m/2) * ms, IO + (m/2) * ms);
      }
 }
 
@@ -85,7 +140,7 @@ static void dobatch(const P *ego, R *IOp, R *IOm,
      X(cpy2d_ci)(IOp + mb * ms, bufp, r, rs, b, me - mb,  ms,  1, 1);
      X(cpy2d_ci)(IOm - mb * ms, bufm, r, rs, b, me - mb, -ms, -1, 1);
 
-     ego->k(bufp, bufm, ego->td->W, ego->brs, mb, me, 1);
+     LORELIB_CFI_13(ego->k)(bufp, bufm, ego->td->W, ego->brs, mb, me, 1);
 
      X(cpy2d_co)(bufp, IOp + mb * ms, r, b, rs, me - mb,  1,  ms, 1);
      X(cpy2d_co)(bufm, IOm - mb * ms, r, b, rs, me - mb, -1, -ms, 1);
@@ -108,14 +163,14 @@ static void apply_buf(const plan *ego_, R *IO)
 	  R *IOp = IO;
 	  R *IOm = IO + m * ms;
 
-	  cld0->apply((plan *) cld0, IO, IO);
+	  LORELIB_CFI_6(cld0->apply)((plan *) cld0, IO, IO);
 
 	  for (j = mb; j + batchsz < me; j += batchsz) 	       
 	       dobatch(ego, IOp, IOm, j, j + batchsz, buf);
 
 	  dobatch(ego, IOp, IOm, j, me, buf);
 
-	  cldm->apply((plan *) cldm, IO + ms * (m/2), IO + ms * (m/2));
+	  LORELIB_CFI_6(cldm->apply)((plan *) cldm, IO + ms * (m/2), IO + ms * (m/2));
      }
 
      BUF_FREE(buf, bufsz);
@@ -148,11 +203,11 @@ static void print(const plan *ego_, printer *p)
      INT batchsz = compute_batchsize(ego->r);
 
      if (slv->bufferedp)
-	  p->print(p, "(hc2hc-directbuf/%D-%D/%D%v \"%s\"%(%p%)%(%p%))",
+	  LORELIB_CFI_27(p->print)(p, "(hc2hc-directbuf/%D-%D/%D%v \"%s\"%(%p%)%(%p%))",
 		   batchsz, ego->r, X(twiddle_length)(ego->r, e->tw), 
 		   ego->v, e->nam, ego->cld0, ego->cldm);
      else
-	  p->print(p, "(hc2hc-direct-%D/%D%v \"%s\"%(%p%)%(%p%))",
+	  LORELIB_CFI_27(p->print)(p, "(hc2hc-direct-%D/%D%v \"%s\"%(%p%)%(%p%))",
 		   ego->r, X(twiddle_length)(ego->r, e->tw), ego->v, e->nam,
 		   ego->cld0, ego->cldm);
 }
@@ -263,7 +318,7 @@ static void regone(planner *plnr, khc2hc codelet, const hc2hc_desc *desc,
      slv->bufferedp = bufferedp;
      REGISTER_SOLVER(plnr, &(slv->super.super));
      if (X(mksolver_hc2hc_hook)) {
-	  slv = (S *)X(mksolver_hc2hc_hook)(sizeof(S), desc->radix, mkcldw);
+	  slv = (S *)fftw_mksolver_hc2hc_hook(sizeof(S), desc->radix, mkcldw);
 	  slv->k = codelet;
 	  slv->desc = desc;
 	  slv->bufferedp = bufferedp;
@@ -277,3 +332,9 @@ void X(regsolver_hc2hc_direct)(planner *plnr, khc2hc codelet,
      regone(plnr, codelet, desc, /* bufferedp */0);
      regone(plnr, codelet, desc, /* bufferedp */1);
 }
+
+//
+// Original code end
+//
+
+

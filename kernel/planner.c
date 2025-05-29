@@ -1,3 +1,79 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'planner__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: double (const struct problem_s *, double, cost_kind)
+#define LORELIB_CFI_1(FP) LORELIB_CFI(1, FP)
+
+// decl: int (const struct problem_s *, flags_t)
+#define LORELIB_CFI_23(FP) LORELIB_CFI(23, FP)
+
+// decl: int (struct scanner_s *, const char *, ...)
+#define LORELIB_CFI_37(FP) LORELIB_CFI(37, FP)
+
+// decl: struct plan_s *(const struct solver_s *, const struct problem_s *, struct planner_s *)
+#define LORELIB_CFI_40(FP) LORELIB_CFI(40, FP)
+
+// decl: struct plan_s *(struct planner_s *, const struct problem_s *)
+#define LORELIB_CFI_2(FP) LORELIB_CFI(2, FP)
+
+// decl: void (const struct problem_s *)
+#define LORELIB_CFI_9(FP) LORELIB_CFI(9, FP)
+
+// decl: void (const struct problem_s *, md5 *)
+#define LORELIB_CFI_10(FP) LORELIB_CFI(10, FP)
+
+// decl: void (struct planner_s *, struct plan_s *, const struct problem_s *, int)
+#define LORELIB_CFI_21(FP) LORELIB_CFI(21, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+// decl: wisdom_state_t (wisdom_state_t, const struct problem_s *)
+#define LORELIB_CFI_35(FP) LORELIB_CFI(35, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2000 Matteo Frigo
  * Copyright (c) 2000 Massachusetts Institute of Technology
@@ -172,7 +248,7 @@ static void md5hash(md5 *m, const problem *p, const planner *plnr)
      X(md5begin)(m);
      X(md5unsigned)(m, sizeof(R)); /* so we don't mix different precisions */
      X(md5int)(m, plnr->nthr);
-     p->adt->hash(p, m);
+     LORELIB_CFI_10(p->adt->hash)(p, m);
      X(md5end)(m);
 }
 
@@ -398,7 +474,7 @@ static void invoke_hook(planner *ego, plan *pln, const problem *p,
 			int optimalp)
 {
      if (ego->hook)
-	  ego->hook(ego, pln, p, optimalp);
+	  LORELIB_CFI_21(ego->hook)(ego, pln, p, optimalp);
 }
 
 #ifdef FFTW_RANDOM_ESTIMATOR
@@ -437,7 +513,7 @@ double X(iestimate_cost)(const planner *ego, const plan *pln, const problem *p)
 	  
 	  + pln->ops.other;
      if (ego->cost_hook)
-	  cost = ego->cost_hook(p, cost, COST_MAX);
+	  cost = LORELIB_CFI_1(ego->cost_hook)(p, cost, COST_MAX);
      return cost;
 }
 
@@ -483,7 +559,7 @@ static plan *invoke_solver(planner *ego, const problem *p, solver *s,
      ego->flags = *nflags;
      PLNR_TIMELIMIT_IMPATIENCE(ego) = 0;
      A(p->adt->problem_kind == s->adt->problem_kind);
-     pln = s->adt->mkplan(s, p, ego);
+     pln = LORELIB_CFI_40(s->adt->mkplan)(s, p, ego);
      ego->nthr = nthr;
      ego->flags = flags;
      return pln;
@@ -643,7 +719,7 @@ static plan *mkplan(planner *ego, const problem *p)
 
      pln = 0;
 
-     CHECK_FOR_BOGOSITY;
+     if ((ego->bogosity_hook ? (ego->wisdom_state = LORELIB_CFI_35(ego->bogosity_hook)(ego->wisdom_state, p)) : ego->wisdom_state) == WISDOM_IS_BOGUS) goto wisdom_is_bogus;;
 
      ego->timed_out = 0;
 
@@ -659,7 +735,7 @@ static plan *mkplan(planner *ego, const problem *p)
 	       
 	       /* this hook is mainly for MPI, to make sure that
 		  wisdom is in sync across all processes for MPI problems */
-	       if (ego->wisdom_ok_hook && !ego->wisdom_ok_hook(p, sol->flags))
+	       if (ego->wisdom_ok_hook && !LORELIB_CFI_23(ego->wisdom_ok_hook)(p, sol->flags))
 		    goto do_search; /* ignore not-ok wisdom */
 	       
 	       slvndx = SLVNDX(sol);
@@ -685,7 +761,7 @@ static plan *mkplan(planner *ego, const problem *p)
 	       
 	       pln = invoke_solver(ego, p, s, &flags_of_solution);
 	       
-	       CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
+	       if ((ego->bogosity_hook ? (ego->wisdom_state = LORELIB_CFI_35(ego->bogosity_hook)(ego->wisdom_state, p)) : ego->wisdom_state) == WISDOM_IS_BOGUS) goto wisdom_is_bogus;; 	  /* catch error in child solvers */
 	       
 	       sol = 0; /* Paranoia: SOL may be dangling after
 			   invoke_solver(); make sure we don't accidentally
@@ -699,7 +775,7 @@ static plan *mkplan(planner *ego, const problem *p)
 	       goto skip_search;
 	  }
 	  else if (ego->nowisdom_hook) /* for MPI, make sure lack of wisdom */
-	       ego->nowisdom_hook(p);  /*   is in sync across all processes */
+	       LORELIB_CFI_9(ego->nowisdom_hook)(p);  /*   is in sync across all processes */
      }
 
  do_search:
@@ -709,7 +785,7 @@ static plan *mkplan(planner *ego, const problem *p)
 
      flags_of_solution = ego->flags;
      pln = search(ego, p, &slvndx, &flags_of_solution);
-     CHECK_FOR_BOGOSITY; 	  /* catch error in child solvers */
+     if ((ego->bogosity_hook ? (ego->wisdom_state = LORELIB_CFI_35(ego->bogosity_hook)(ego->wisdom_state, p)) : ego->wisdom_state) == WISDOM_IS_BOGUS) goto wisdom_is_bogus;; 	  /* catch error in child solvers */
 
      if (ego->timed_out) {
 	  A(!pln);
@@ -795,7 +871,7 @@ static void exprt(planner *ego, printer *p)
 
      signature_of_configuration(&m, ego);
 
-     p->print(p, 
+     LORELIB_CFI_27(p->print)(p, 
 	      "(" WISDOM_PREAMBLE " #x%M #x%M #x%M #x%M\n",
 	      m.s[0], m.s[1], m.s[2], m.s[3]);
 
@@ -816,13 +892,13 @@ static void exprt(planner *ego, printer *p)
 
 	       /* qui salvandos salvas gratis
 		  salva me fons pietatis */
-	       p->print(p, "  (%s %d #x%x #x%x #x%x #x%M #x%M #x%M #x%M)\n",
+	       LORELIB_CFI_27(p->print)(p, "  (%s %d #x%x #x%x #x%x #x%M #x%M #x%M #x%M)\n",
 			reg_nam, reg_id, 
 			l->flags.l, l->flags.u, l->flags.timelimit_impatience, 
 			l->s[0], l->s[1], l->s[2], l->s[3]);
 	  }
      }
-     p->print(p, ")\n");
+     LORELIB_CFI_27(p->print)(p, ")\n");
 }
 
 /* mors stupebit et natura
@@ -839,7 +915,7 @@ static int imprt(planner *ego, scanner *sc)
      hashtab old;
      md5 m;
 
-     if (!sc->scan(sc, 
+     if (!LORELIB_CFI_37(sc->scan)(sc, 
 		   "(" WISDOM_PREAMBLE " #x%M #x%M #x%M #x%M\n",
 		   sig + 0, sig + 1, sig + 2, sig + 3))
 	  return 0; /* don't need to restore hashtable */
@@ -861,11 +937,11 @@ static int imprt(planner *ego, scanner *sc)
      }
 
      while (1) {
-	  if (sc->scan(sc, ")"))
+	  if (LORELIB_CFI_37(sc->scan)(sc, ")"))
 	       break;
 
 	  /* qua resurget ex favilla */
-	  if (!sc->scan(sc, "(%*s %d #x%x #x%x #x%x #x%M #x%M #x%M #x%M)",
+	  if (!LORELIB_CFI_37(sc->scan)(sc, "(%*s %d #x%x #x%x #x%x #x%M #x%M #x%M #x%M)",
 			MAXNAM, buf, &reg_id, &l, &u, &timelimit_impatience,
 			sig + 0, sig + 1, sig + 2, sig + 3))
 	       goto bad;
@@ -967,7 +1043,7 @@ void X(planner_destroy)(planner *ego)
 
 plan *X(mkplan_d)(planner *ego, problem *p)
 {
-     plan *pln = ego->adt->mkplan(ego, p);
+     plan *pln = LORELIB_CFI_2(ego->adt->mkplan)(ego, p);
      X(problem_destroy)(p);
      return pln;
 }
@@ -1033,3 +1109,9 @@ static void check(hashtab *ht)
      }
 }
 #endif
+
+//
+// Original code end
+//
+
+

@@ -1,3 +1,61 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'ct-hc2c-direct__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: int (const double *, const double *, const double *, const double *, long, long, long, long, const struct planner_s *)
+#define LORELIB_CFI_12(FP) LORELIB_CFI(12, FP)
+
+// decl: void (const struct plan_s *, double *, double *, double *, double *)
+#define LORELIB_CFI_7(FP) LORELIB_CFI(7, FP)
+
+// decl: void (double *, double *, double *, double *, const double *, long *, long, long, long)
+#define LORELIB_CFI_14(FP) LORELIB_CFI(14, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -51,10 +109,10 @@ static void apply(const plan *ego_, R *cr, R *ci)
      INT ms = ego->ms, vs = ego->vs;
 
      for (i = 0; i < v; ++i, cr += vs, ci += vs) {
-	  cld0->apply((plan *) cld0, cr, ci, cr, ci);
-	  ego->k(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+	  LORELIB_CFI_7(cld0->apply)((plan *) cld0, cr, ci, cr, ci);
+	  LORELIB_CFI_14(ego->k)(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 		 ego->td->W, ego->rs, 1, (m+1)/2, ms);
-	  cldm->apply((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
+	  LORELIB_CFI_7(cldm->apply)((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
 		      cr + (m/2)*ms, ci + (m/2)*ms);
      }
 }
@@ -69,7 +127,7 @@ static void apply_extra_iter(const plan *ego_, R *cr, R *ci)
      INT mm = (m-1)/2;
 
      for (i = 0; i < v; ++i, cr += vs, ci += vs) {
-	  cld0->apply((plan *) cld0, cr, ci, cr, ci);
+	  LORELIB_CFI_7(cld0->apply)((plan *) cld0, cr, ci, cr, ci);
 
 	  /* for 4-way SIMD when (m+1)/2-1 is odd: iterate over an
 	     even vector length MM-1, and then execute the last
@@ -77,11 +135,11 @@ static void apply_extra_iter(const plan *ego_, R *cr, R *ci)
 	     twiddle factors of the second half of the last iteration
 	     are bogus, but we only store the results of the first
 	     half. */
-	  ego->k(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+	  LORELIB_CFI_14(ego->k)(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 		 ego->td->W, ego->rs, 1, mm, ms);
-	  ego->k(cr + mm*ms, ci + mm*ms, cr + (m-mm)*ms, ci + (m-mm)*ms,
+	  LORELIB_CFI_14(ego->k)(cr + mm*ms, ci + mm*ms, cr + (m-mm)*ms, ci + (m-mm)*ms,
 		 ego->td->W, ego->rs, mm, mm+2, 0);
-	  cldm->apply((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
+	  LORELIB_CFI_7(cldm->apply)((plan *) cldm, cr + (m/2)*ms, ci + (m/2)*ms, 
 		      cr + (m/2)*ms, ci + (m/2)*ms);
      }
 
@@ -127,7 +185,7 @@ static void dobatch(const P *ego, R *Rp, R *Ip, R *Rm, R *Im,
           X(zero1d_pair)(bufm - 2*n, bufm + 1 - 2*n, ego->r / 2, b);
      }
 
-     ego->k(bufp, bufp + 1, bufm, bufm + 1, ego->td->W, 
+     LORELIB_CFI_14(ego->k)(bufp, bufp + 1, bufm, bufm + 1, ego->td->W, 
 	    ego->brs, mb, me + extra_iter, 2);
      X(cpy2d_pair_co)(bufp, bufp + 1, Rp + mb * ms, Ip + mb * ms, 
 		      ego->r / 2, b, rs,
@@ -156,14 +214,14 @@ static void apply_buf(const plan *ego_, R *cr, R *ci)
 	  R *Rm = cr + ego->m * ms;
 	  R *Im = ci + ego->m * ms;
 
-	  cld0->apply((plan *) cld0, Rp, Ip, Rp, Ip);
+	  LORELIB_CFI_7(cld0->apply)((plan *) cld0, Rp, Ip, Rp, Ip);
 
 	  for (j = mb; j + batchsz < me; j += batchsz) 
 	       dobatch(ego, Rp, Ip, Rm, Im, j, j + batchsz, 0, buf);
 
 	  dobatch(ego, Rp, Ip, Rm, Im, j, me, ego->extra_iter, buf);
 
-	  cldm->apply((plan *) cldm, 
+	  LORELIB_CFI_7(cldm->apply)((plan *) cldm, 
 		      Rp + me * ms, Ip + me * ms,
 		      Rp + me * ms, Ip + me * ms);
 
@@ -202,13 +260,13 @@ static void print(const plan *ego_, printer *p)
      const hc2c_desc *e = slv->desc;
 
      if (slv->bufferedp)
-	  p->print(p, "(hc2c-directbuf/%D-%D/%D/%D%v \"%s\"%(%p%)%(%p%))",
+	  LORELIB_CFI_27(p->print)(p, "(hc2c-directbuf/%D-%D/%D/%D%v \"%s\"%(%p%)%(%p%))",
 		   compute_batchsize(ego->r),
 		   ego->r, X(twiddle_length)(ego->r, e->tw),
 		   ego->extra_iter, ego->v, e->nam, 
 		   ego->cld0, ego->cldm);
      else
-	  p->print(p, "(hc2c-direct-%D/%D/%D%v \"%s\"%(%p%)%(%p%))",
+	  LORELIB_CFI_27(p->print)(p, "(hc2c-direct-%D/%D/%D%v \"%s\"%(%p%)%(%p%))",
 		   ego->r, X(twiddle_length)(ego->r, e->tw), 
 		   ego->extra_iter, ego->v, e->nam, 
 		   ego->cld0, ego->cldm);
@@ -232,20 +290,20 @@ static int applicable0(const S *ego, rdft_kind kind,
 
 	  /* first v-loop iteration */
 	  && ((*extra_iter = 0,
-	       e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+	       LORELIB_CFI_12(e->genus->okp)(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 			     rs, 1, (m+1)/2, ms, plnr))
               ||
 	      (*extra_iter = 1,
-	       ((e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+	       ((LORELIB_CFI_12(e->genus->okp)(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 			       rs, 1, (m-1)/2, ms, plnr))
 		&&
-		(e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+		(LORELIB_CFI_12(e->genus->okp)(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 			       rs, (m-1)/2, (m-1)/2 + 2, 0, plnr)))))
 	  
 	  /* subsequent v-loop iterations */
 	  && (cr += vs, ci += vs, 1)
 
-	  && e->genus->okp(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
+	  && LORELIB_CFI_12(e->genus->okp)(cr + ms, ci + ms, cr + (m-1)*ms, ci + (m-1)*ms,
 			   rs, 1, (m+1)/2 - *extra_iter, ms, plnr)
 	  );
 }
@@ -271,15 +329,15 @@ static int applicable0_buf(const S *ego, rdft_kind kind,
 	      batchsz = compute_batchsize(r), 
 	      brs = 4 * batchsz, 1)
 
-	  && e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+	  && LORELIB_CFI_12(e->genus->okp)(cr, ci, cr + brs - 2, ci + brs - 2, 
 			   brs, 1, 1+batchsz, 2, plnr)
 
 	  && ((*extra_iter = 0,
-	       e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+	       LORELIB_CFI_12(e->genus->okp)(cr, ci, cr + brs - 2, ci + brs - 2, 
 			     brs, 1, 1 + (((m-1)/2) % batchsz), 2, plnr))
 	      ||
 	      (*extra_iter = 1,
-	       e->genus->okp(cr, ci, cr + brs - 2, ci + brs - 2, 
+	       LORELIB_CFI_12(e->genus->okp)(cr, ci, cr + brs - 2, ci + brs - 2, 
 			     brs, 1, 1 + 1 + (((m-1)/2) % batchsz), 2, plnr)))
 	      
 	  );
@@ -402,3 +460,9 @@ void X(regsolver_hc2c_direct)(planner *plnr, khc2c codelet,
      regone(plnr, codelet, desc, hc2ckind, /* bufferedp */0);
      regone(plnr, codelet, desc, hc2ckind, /* bufferedp */1);
 }
+
+//
+// Original code end
+//
+
+

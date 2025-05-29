@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'reodft00e-splitradix__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *)
+#define LORELIB_CFI_6(FP) LORELIB_CFI(6, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2005 Matteo Frigo
  * Copyright (c) 2005 Massachusetts Institute of Technology
@@ -70,14 +122,14 @@ static void apply_e(const plan *ego_, R *I, R *O)
 	       buf[j++] = I[is * i];
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->cldo;
-	       cld->apply((plan *) cld, buf, buf);
+	       LORELIB_CFI_6(cld->apply)((plan *) cld, buf, buf);
 	  }
 
 	  /* do size (n+1)/2 redft00 of the even-indexed elements,
 	     writing to O: */
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->clde;
-	       cld->apply((plan *) cld, I, O);
+	       LORELIB_CFI_6(cld->apply)((plan *) cld, I, O);
 	  }
 
 	  /* combine the results with the twiddle factors to get output */
@@ -147,7 +199,7 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	       buf[j++] = -I[is * i];
 	  {
 	       plan_rdft *cld = (plan_rdft *) ego->cldo;
-	       cld->apply((plan *) cld, buf, buf);
+	       LORELIB_CFI_6(cld->apply)((plan *) cld, buf, buf);
 	  }
 
 	  /* do size (n-1)/2 rodft00 of the odd-indexed elements,
@@ -156,7 +208,7 @@ static void apply_o(const plan *ego_, R *I, R *O)
 	       plan_rdft *cld = (plan_rdft *) ego->clde;
 	       if (I == O) {
 		    /* can't use I+is and I, subplan would lose in-placeness */
-		    cld->apply((plan *) cld, I + is, I + is);
+		    LORELIB_CFI_6(cld->apply)((plan *) cld, I + is, I + is);
 		    /* we could maybe avoid this copy by modifying the
 		       twiddle loop, but currently I can't be bothered. */
 		    A(is >= os);
@@ -164,7 +216,7 @@ static void apply_o(const plan *ego_, R *I, R *O)
 			 O[os*i] = I[is*(i+1)];
 	       }
 	       else
-		    cld->apply((plan *) cld, I + is, O);
+		    LORELIB_CFI_6(cld->apply)((plan *) cld, I + is, O);
 	  }
 
 	  /* combine the results with the twiddle factors to get output */
@@ -232,10 +284,10 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      if (ego->super.apply == apply_e)
-	  p->print(p, "(redft00e-splitradix-%D%v%(%p%)%(%p%))", 
+	  LORELIB_CFI_27(p->print)(p, "(redft00e-splitradix-%D%v%(%p%)%(%p%))", 
 		   ego->n + 1, ego->vl, ego->clde, ego->cldo);
      else
-	  p->print(p, "(rodft00e-splitradix-%D%v%(%p%)%(%p%))", 
+	  LORELIB_CFI_27(p->print)(p, "(rodft00e-splitradix-%D%v%(%p%)%(%p%))", 
 		   ego->n - 1, ego->vl, ego->clde, ego->cldo);
 }
 
@@ -352,3 +404,9 @@ void X(reodft00e_splitradix_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }
+
+//
+// Original code end
+//
+
+

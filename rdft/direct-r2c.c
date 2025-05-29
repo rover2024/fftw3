@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'direct-r2c__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (double *, double *, double *, double *, long *, long *, long *, long, long, long)
+#define LORELIB_CFI_15(FP) LORELIB_CFI(15, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -47,7 +99,7 @@ static void apply_r2hc(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k(I, I + ego->rs0, O, O + ego->ioffset, 
+     LORELIB_CFI_15(ego->k)(I, I + ego->rs0, O, O + ego->ioffset, 
 	    ego->rs, ego->csr, ego->csi,
 	    ego->vl, ego->ivs, ego->ovs);
 }
@@ -56,7 +108,7 @@ static void apply_hc2r(const plan *ego_, R *I, R *O)
 {
      const P *ego = (const P *) ego_;
      ASSERT_ALIGNED_DOUBLE;
-     ego->k(O, O + ego->rs0, I, I + ego->ioffset, 
+     LORELIB_CFI_15(ego->k)(O, O + ego->rs0, I, I + ego->ioffset, 
 	    ego->rs, ego->csr, ego->csi,
 	    ego->vl, ego->ivs, ego->ovs);
 }
@@ -82,13 +134,13 @@ static void dobatch_r2hc(const P *ego, R *I, R *O, R *buf, INT batchsz)
 
      if (IABS(WS(ego->csr, 1)) < IABS(ego->ovs)) {
 	  /* transform directly to output */
-	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1), 
+	  LORELIB_CFI_15(ego->k)(buf, buf + WS(ego->bcsr /* hack */, 1), 
 		 O, O + ego->ioffset, 
 		 ego->brs, ego->csr, ego->csi,
 		 batchsz, 1, ego->ovs);
      } else {
 	  /* transform to buffer and copy back */
-	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1), 
+	  LORELIB_CFI_15(ego->k)(buf, buf + WS(ego->bcsr /* hack */, 1), 
 		 buf, buf + ego->bioffset, 
 		 ego->brs, ego->bcsr, ego->bcsi,
 		 batchsz, 1, 1);
@@ -102,7 +154,7 @@ static void dobatch_hc2r(const P *ego, R *I, R *O, R *buf, INT batchsz)
 {
      if (IABS(WS(ego->csr, 1)) < IABS(ego->ivs)) {
 	  /* transform directly from input */
-	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1),
+	  LORELIB_CFI_15(ego->k)(buf, buf + WS(ego->bcsr /* hack */, 1),
 		 I, I + ego->ioffset, 
 		 ego->brs, ego->csr, ego->csi,
 		 batchsz, ego->ivs, 1);
@@ -111,7 +163,7 @@ static void dobatch_hc2r(const P *ego, R *I, R *O, R *buf, INT batchsz)
 	  X(cpy2d_ci)(I, buf,
 		      ego->n, WS(ego->csr, 1), WS(ego->bcsr, 1),
 		      batchsz, ego->ivs, 1, 1);
-	  ego->k(buf, buf + WS(ego->bcsr /* hack */, 1),
+	  LORELIB_CFI_15(ego->k)(buf, buf + WS(ego->bcsr /* hack */, 1),
 		 buf, buf + ego->bioffset, 
 		 ego->brs, ego->bcsr, ego->bcsi,
 		 batchsz, 1, 1);
@@ -171,13 +223,13 @@ static void print(const plan *ego_, printer *p)
      const S *s = ego->slv;
 
      if (ego->slv->bufferedp)
-	  p->print(p, "(rdft-%s-directbuf/%D-r2c-%D%v \"%s\")", 
+	  LORELIB_CFI_27(p->print)(p, "(rdft-%s-directbuf/%D-r2c-%D%v \"%s\")", 
 		   X(rdft_kind_str)(s->desc->genus->kind), 
 		   /* hack */ WS(ego->bcsr, 1), ego->n, 
 		   ego->vl, s->desc->nam);
 
      else 
-	  p->print(p, "(rdft-%s-direct-r2c-%D%v \"%s\")", 
+	  LORELIB_CFI_27(p->print)(p, "(rdft-%s-direct-r2c-%D%v \"%s\")", 
 		   X(rdft_kind_str)(s->desc->genus->kind), ego->n, 
 		   ego->vl, s->desc->nam);
 }
@@ -339,3 +391,9 @@ solver *X(mksolver_rdft_r2c_directbuf)(kr2c k, const kr2c_desc *desc)
 {
      return mksolver(k, desc, 1);
 }
+
+//
+// Original code end
+//
+
+

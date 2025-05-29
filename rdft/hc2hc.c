@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'hc2hc__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *)
+#define LORELIB_CFI_6(FP) LORELIB_CFI(6, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -36,7 +88,7 @@ static void apply_dit(const plan *ego_, R *I, R *O)
      plan_hc2hc *cldw;
 
      cld = (plan_rdft *) ego->cld;
-     cld->apply(ego->cld, I, O);
+     LORELIB_CFI_6(cld->apply)(ego->cld, I, O);
 
      cldw = (plan_hc2hc *) ego->cldw;
      cldw->apply(ego->cldw, O);
@@ -52,7 +104,7 @@ static void apply_dif(const plan *ego_, R *I, R *O)
      cldw->apply(ego->cldw, I);
 
      cld = (plan_rdft *) ego->cld;
-     cld->apply(ego->cld, I, O);
+     LORELIB_CFI_6(cld->apply)(ego->cld, I, O);
 }
 
 static void awake(plan *ego_, enum wakefulness wakefulness)
@@ -72,7 +124,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(rdft-ct-%s/%D%(%p%)%(%p%))",
+     LORELIB_CFI_27(p->print)(p, "(rdft-ct-%s/%D%(%p%)%(%p%))",
 	      ego->super.apply == apply_dit ? "dit" : "dif",
 	      ego->r, ego->cldw, ego->cld);
 }
@@ -212,3 +264,9 @@ plan *X(mkplan_hc2hc)(size_t size, const plan_adt *adt, hc2hcapply apply)
 
      return &(ego->super);
 }
+
+//
+// Original code end
+//
+
+

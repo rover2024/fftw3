@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'vrank3-transpose__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *)
+#define LORELIB_CFI_6(FP) LORELIB_CFI(6, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -198,7 +250,7 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
      if (n > 1) {
 	  rdftapply cldapply = ((plan_rdft *) ego->cld1)->apply;
 	  for (i = 0; i < d; ++i) {
-	       cldapply(ego->cld1, I + i*num_el, buf);
+	       LORELIB_CFI_6(cldapply)(ego->cld1, I + i*num_el, buf);
 	       memcpy(I + i*num_el, buf, num_el*sizeof(R));
 	  }
      }
@@ -207,7 +259,7 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
 	is a square in-place transpose of n*m-tuples: */
      {
 	  rdftapply cldapply = ((plan_rdft *) ego->cld2)->apply;
-	  cldapply(ego->cld2, I, I);
+	  LORELIB_CFI_6(cldapply)(ego->cld2, I, I);
      }
      
      /* Finally, transpose d' x ((d x n) x m) to d' x (m x (d x n)),
@@ -216,7 +268,7 @@ static void apply_gcd(const plan *ego_, R *I, R *O)
      if (m > 1) {
 	  rdftapply cldapply = ((plan_rdft *) ego->cld3)->apply;
 	  for (i = 0; i < d; ++i) {
-	       cldapply(ego->cld3, I + i*num_el, buf);
+	       LORELIB_CFI_6(cldapply)(ego->cld3, I + i*num_el, buf);
 	       memcpy(I + i*num_el, buf, num_el*sizeof(R));
 	  }
      }
@@ -330,19 +382,19 @@ static void apply_cut(const plan *ego_, R *I, R *O)
      UNUSED(O);
 
      if (m > mc) {
-	  ((plan_rdft *) ego->cld1)->apply(ego->cld1, I + mc*vl, buf1);
+	  LORELIB_CFI_6(((plan_rdft *) ego->cld1)->apply)(ego->cld1, I + mc*vl, buf1);
 	  for (i = 0; i < nc; ++i)
 	       memmove(I + (mc*vl) * i, I + (m*vl) * i, sizeof(R) * (mc*vl));
      }
 
-     ((plan_rdft *) ego->cld2)->apply(ego->cld2, I, I); /* nc x mc transpose */
+     LORELIB_CFI_6(((plan_rdft *) ego->cld2)->apply)(ego->cld2, I, I); /* nc x mc transpose */
      
      if (n > nc) {
 	  R *buf2 = buf1 + (m-mc)*(nc*vl); /* FIXME: force better alignment? */
 	  memcpy(buf2, I + nc*(m*vl), (n-nc)*(m*vl)*sizeof(R));
 	  for (i = mc-1; i >= 0; --i)
 	       memmove(I + (n*vl) * i, I + (nc*vl) * i, sizeof(R) * (n*vl));
-	  ((plan_rdft *) ego->cld3)->apply(ego->cld3, buf2, I + nc*vl);
+	  LORELIB_CFI_6(((plan_rdft *) ego->cld3)->apply)(ego->cld3, buf2, I + nc*vl);
      }
 
      if (m > mc) {
@@ -703,12 +755,12 @@ static void awake(plan *ego_, enum wakefulness wakefulness)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(%s-%Dx%D%v", ego->slv->adt->nam,
+     LORELIB_CFI_27(p->print)(p, "(%s-%Dx%D%v", ego->slv->adt->nam,
 	      ego->n, ego->m, ego->vl);
-     if (ego->cld1) p->print(p, "%(%p%)", ego->cld1);
-     if (ego->cld2) p->print(p, "%(%p%)", ego->cld2);
-     if (ego->cld3) p->print(p, "%(%p%)", ego->cld3);
-     p->print(p, ")");
+     if (ego->cld1) LORELIB_CFI_27(p->print)(p, "%(%p%)", ego->cld1);
+     if (ego->cld2) LORELIB_CFI_27(p->print)(p, "%(%p%)", ego->cld2);
+     if (ego->cld3) LORELIB_CFI_27(p->print)(p, "%(%p%)", ego->cld3);
+     LORELIB_CFI_27(p->print)(p, ")");
 }
 
 static void destroy(plan *ego_)
@@ -775,3 +827,9 @@ void X(rdft_vrank3_transpose_register)(planner *p)
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));
 }
+
+//
+// Original code end
+//
+
+

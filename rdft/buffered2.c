@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'buffered2__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *, double *, double *)
+#define LORELIB_CFI_7(FP) LORELIB_CFI(7, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -55,11 +107,11 @@ static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* transform to bufs: */
-          cld->apply((plan *) cld, r0, r1, bufr, bufi);
+          LORELIB_CFI_7(cld->apply)((plan *) cld, r0, r1, bufr, bufi);
 	  r0 += ivs_by_nbuf; r1 += ivs_by_nbuf;
 
           /* copy back */
-          cldcpy->apply((plan *) cldcpy, bufr, bufi, cr, ci);
+          LORELIB_CFI_7(cldcpy->apply)((plan *) cldcpy, bufr, bufi, cr, ci);
 	  cr += ovs_by_nbuf; ci += ovs_by_nbuf;
      }
 
@@ -67,7 +119,7 @@ static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 
      /* Do the remaining transforms, if any: */
      cldrest = (plan_rdft2 *) ego->cldrest;
-     cldrest->apply((plan *) cldrest, r0, r1, cr, ci);
+     LORELIB_CFI_7(cldrest->apply)((plan *) cldrest, r0, r1, cr, ci);
 }
 
 /* for hc2r problems, copy the input into buffer, and then
@@ -87,11 +139,11 @@ static void apply_hc2r(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 
      for (i = nbuf; i <= vl; i += nbuf) {
           /* copy input into bufs: */
-          cldcpy->apply((plan *) cldcpy, cr, ci, bufr, bufi);
+          LORELIB_CFI_7(cldcpy->apply)((plan *) cldcpy, cr, ci, bufr, bufi);
 	  cr += ivs_by_nbuf; ci += ivs_by_nbuf;
 
           /* transform to output */
-          cld->apply((plan *) cld, r0, r1, bufr, bufi);
+          LORELIB_CFI_7(cld->apply)((plan *) cld, r0, r1, bufr, bufi);
 	  r0 += ovs_by_nbuf; r1 += ovs_by_nbuf;
      }
 
@@ -99,7 +151,7 @@ static void apply_hc2r(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 
      /* Do the remaining transforms, if any: */
      cldrest = (plan_rdft2 *) ego->cldrest;
-     cldrest->apply((plan *) cldrest, r0, r1, cr, ci);
+     LORELIB_CFI_7(cldrest->apply)((plan *) cldrest, r0, r1, cr, ci);
 }
 
 
@@ -123,7 +175,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
-     p->print(p, "(rdft2-buffered-%D%v/%D-%D%(%p%)%(%p%)%(%p%))",
+     LORELIB_CFI_27(p->print)(p, "(rdft2-buffered-%D%v/%D-%D%(%p%)%(%p%)%(%p%))",
               ego->n, ego->nbuf,
               ego->vl, ego->bufdist % ego->n,
               ego->cld, ego->cldcpy, ego->cldrest);
@@ -373,3 +425,9 @@ void X(rdft2_buffered_register)(planner *p)
      for (i = 0; i < NELEM(maxnbufs); ++i)
 	  REGISTER_SOLVER(p, mksolver(i));
 }
+
+//
+// Original code end
+//
+
+

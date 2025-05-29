@@ -1,3 +1,58 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'bluestein__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *, double *, double *)
+#define LORELIB_CFI_7(FP) LORELIB_CFI(7, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+// decl: void (struct triggen_s *, long, double *)
+#define LORELIB_CFI_31(FP) LORELIB_CFI(31, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -41,7 +96,7 @@ static void bluestein_sequence(enum wakefulness wakefulness, INT n, R *w)
 
      ksq = 0;
      for (k = 0; k < n; ++k) {
-	  t->cexp(t, ksq, w+2*k);
+	  LORELIB_CFI_31(t->cexp)(t, ksq, w+2*k);
           /* careful with overflow */
           ksq += 2*k + 1; while (ksq > n2) ksq -= n2;
      }
@@ -75,7 +130,7 @@ static void mktwiddle(enum wakefulness wakefulness, P *p)
      {
           plan_dft *cldf = (plan_dft *)p->cldf;
 	  /* cldf must be awake */
-          cldf->apply(p->cldf, W, W+1, W, W+1);
+          LORELIB_CFI_7(cldf->apply)(p->cldf, W, W+1, W, W+1);
      }
 }
 
@@ -99,7 +154,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      /* convolution: FFT */
      {
           plan_dft *cldf = (plan_dft *)ego->cldf;
-          cldf->apply(ego->cldf, b, b+1, b, b+1);
+          LORELIB_CFI_7(cldf->apply)(ego->cldf, b, b+1, b, b+1);
      }
 
      /* convolution: pointwise multiplication */
@@ -113,7 +168,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      /* convolution: IFFT by FFT with real/imag input/output swapped */
      {
           plan_dft *cldf = (plan_dft *)ego->cldf;
-          cldf->apply(ego->cldf, b, b+1, b, b+1);
+          LORELIB_CFI_7(cldf->apply)(ego->cldf, b, b+1, b, b+1);
      }
 
      /* multiply output by conjugate bluestein sequence */
@@ -173,7 +228,7 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *)ego_;
-     p->print(p, "(dft-bluestein-%D/%D%(%p%))",
+     LORELIB_CFI_27(p->print)(p, "(dft-bluestein-%D/%D%(%p%))",
               ego->n, ego->nb, ego->cldf);
 }
 
@@ -248,3 +303,9 @@ void X(dft_bluestein_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }
+
+//
+// Original code end
+//
+
+

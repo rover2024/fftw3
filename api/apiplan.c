@@ -1,3 +1,58 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'apiplan__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: struct plan_s *(struct planner_s *, const struct problem_s *)
+#define LORELIB_CFI_2(FP) LORELIB_CFI(2, FP)
+
+// decl: void (struct planner_s *, amnesia)
+#define LORELIB_CFI_20(FP) LORELIB_CFI(20, FP)
+
+// decl: void (void)
+#define LORELIB_CFI_33(FP) LORELIB_CFI(33, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -39,7 +94,7 @@ static plan *mkplan0(planner *plnr, unsigned flags,
      plnr->wisdom_state = wisdom_state;
 
      /* create plan */
-     return plnr->adt->mkplan(plnr, prb);
+     return LORELIB_CFI_2(plnr->adt->mkplan)(plnr, prb);
 }
 
 static unsigned force_estimator(unsigned flags)
@@ -65,14 +120,14 @@ static plan *mkplan(planner *plnr, unsigned flags,
      if (plnr->wisdom_state == WISDOM_IS_BOGUS) {
 	  /* if the planner detected a wisdom inconsistency,
 	     forget all wisdom and plan again */
-	  plnr->adt->forget(plnr, FORGET_EVERYTHING);
+	  LORELIB_CFI_20(plnr->adt->forget)(plnr, FORGET_EVERYTHING);
 
 	  A(!pln);
 	  pln = mkplan0(plnr, flags, prb, hash_info, WISDOM_NORMAL);
 
 	  if (plnr->wisdom_state == WISDOM_IS_BOGUS) {
 	       /* if it still fails, plan without wisdom */
-	       plnr->adt->forget(plnr, FORGET_EVERYTHING);
+	       LORELIB_CFI_20(plnr->adt->forget)(plnr, FORGET_EVERYTHING);
 
 	       A(!pln);
 	       pln = mkplan0(plnr, force_estimator(flags),
@@ -95,7 +150,7 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
      double pcost = 0;
      
      if (before_planner_hook)
-          before_planner_hook();
+          LORELIB_CFI_33(before_planner_hook)();
      
      plnr = X(the_planner)();
 
@@ -164,14 +219,14 @@ apiplan *X(mkapiplan)(int sign, unsigned flags, problem *prb)
 	  X(problem_destroy)(prb);
 
      /* discard all information not necessary to reconstruct the plan */
-     plnr->adt->forget(plnr, FORGET_ACCURSED);
+     LORELIB_CFI_20(plnr->adt->forget)(plnr, FORGET_ACCURSED);
 
 #ifdef FFTW_RANDOM_ESTIMATOR
      X(random_estimate_seed)++; /* subsequent "random" plans are distinct */
 #endif
 
      if (after_planner_hook)
-          after_planner_hook();
+          LORELIB_CFI_33(after_planner_hook)();
      
      return p;
 }
@@ -180,7 +235,7 @@ void X(destroy_plan)(X(plan) p)
 {
      if (p) {
           if (before_planner_hook)
-               before_planner_hook();
+               LORELIB_CFI_33(before_planner_hook)();
      
           X(plan_awake)(p->pln, SLEEPY);
           X(plan_destroy_internal)(p->pln);
@@ -188,7 +243,7 @@ void X(destroy_plan)(X(plan) p)
           X(ifree)(p);
 
           if (after_planner_hook)
-               after_planner_hook();
+               LORELIB_CFI_33(after_planner_hook)();
      }
 }
 
@@ -196,3 +251,9 @@ int X(alignment_of)(R *p)
 {
      return X(ialignment_of(p));
 }
+
+//
+// Original code end
+//
+
+

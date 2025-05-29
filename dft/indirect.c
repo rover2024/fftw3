@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'indirect__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *, double *, double *)
+#define LORELIB_CFI_7(FP) LORELIB_CFI(7, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -58,11 +110,11 @@ static void apply_before(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      {
           plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-          cldcpy->apply(ego->cldcpy, ri, ii, ro, io);
+          LORELIB_CFI_7(cldcpy->apply)(ego->cldcpy, ri, ii, ro, io);
      }
      {
           plan_dft *cld = (plan_dft *) ego->cld;
-          cld->apply(ego->cld, ro, io, ro, io);
+          LORELIB_CFI_7(cld->apply)(ego->cld, ro, io, ro, io);
      }
 }
 
@@ -87,11 +139,11 @@ static void apply_after(const plan *ego_, R *ri, R *ii, R *ro, R *io)
 
      {
           plan_dft *cld = (plan_dft *) ego->cld;
-          cld->apply(ego->cld, ri, ii, ri, ii);
+          LORELIB_CFI_7(cld->apply)(ego->cld, ri, ii, ri, ii);
      }
      {
           plan_dft *cldcpy = (plan_dft *) ego->cldcpy;
-          cldcpy->apply(ego->cldcpy, ri, ii, ro, io);
+          LORELIB_CFI_7(cldcpy->apply)(ego->cldcpy, ri, ii, ro, io);
      }
 }
 
@@ -126,7 +178,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      const S *s = ego->slv;
-     p->print(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
+     LORELIB_CFI_27(p->print)(p, "(%s%(%p%)%(%p%))", s->adt->nam, ego->cld, ego->cldcpy);
 }
 
 static int applicable0(const solver *ego_, const problem *p_,
@@ -238,3 +290,9 @@ void X(dft_indirect_register)(planner *p)
      for (i = 0; i < sizeof(adts) / sizeof(adts[0]); ++i)
           REGISTER_SOLVER(p, mksolver(adts[i]));
 }
+
+//
+// Original code end
+//
+
+

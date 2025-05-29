@@ -1,3 +1,55 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'rank-geq2-rdft2__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *, double *, double *)
+#define LORELIB_CFI_7(FP) LORELIB_CFI(7, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -43,12 +95,12 @@ static void apply_r2hc(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 
      {
 	  plan_rdft2 *cldr = (plan_rdft2 *) ego->cldr;
-	  cldr->apply((plan *) cldr, r0, r1, cr, ci);
+	  LORELIB_CFI_7(cldr->apply)((plan *) cldr, r0, r1, cr, ci);
      }
      
      {
 	  plan_dft *cldc = (plan_dft *) ego->cldc;
-	  cldc->apply((plan *) cldc, cr, ci, cr, ci);
+	  LORELIB_CFI_7(cldc->apply)((plan *) cldc, cr, ci, cr, ci);
      }
 }
 
@@ -58,12 +110,12 @@ static void apply_hc2r(const plan *ego_, R *r0, R *r1, R *cr, R *ci)
 
      {
 	  plan_dft *cldc = (plan_dft *) ego->cldc;
-	  cldc->apply((plan *) cldc, ci, cr, ci, cr);
+	  LORELIB_CFI_7(cldc->apply)((plan *) cldc, ci, cr, ci, cr);
      }
 
      {
 	  plan_rdft2 *cldr = (plan_rdft2 *) ego->cldr;
-	  cldr->apply((plan *) cldr, r0, r1, cr, ci);
+	  LORELIB_CFI_7(cldr->apply)((plan *) cldr, r0, r1, cr, ci);
      }
      
 }
@@ -86,7 +138,7 @@ static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *) ego_;
      const S *s = ego->solver;
-     p->print(p, "(rdft2-rank>=2/%d%(%p%)%(%p%))", 
+     LORELIB_CFI_27(p->print)(p, "(rdft2-rank>=2/%d%(%p%)%(%p%))", 
 	      s->spltrnk, ego->cldr, ego->cldc);
 }
  
@@ -236,3 +288,9 @@ void X(rdft2_rank_geq2_register)(planner *p)
 
      /* FIXME: Should we try more buddies?  See also dft/rank-geq2. */
 }
+
+//
+// Original code end
+//
+
+

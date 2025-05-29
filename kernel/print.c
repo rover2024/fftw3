@@ -1,3 +1,61 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'print__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, struct printer_s *)
+#define LORELIB_CFI_8(FP) LORELIB_CFI(8, FP)
+
+// decl: void (const struct problem_s *, struct printer_s *)
+#define LORELIB_CFI_11(FP) LORELIB_CFI(11, FP)
+
+// decl: void (struct printer_s *)
+#define LORELIB_CFI_25(FP) LORELIB_CFI(25, FP)
+
+// decl: void (struct printer_s *, char)
+#define LORELIB_CFI_26(FP) LORELIB_CFI(26, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -30,16 +88,16 @@ static void myputs(printer *p, const char *s)
 {
      char c;
      while ((c = *s++))
-          p->putchr(p, c);
+          LORELIB_CFI_26(p->putchr)(p, c);
 }
 
 static void newline(printer *p)
 {
      int i;
 
-     p->putchr(p, '\n');
+     LORELIB_CFI_26(p->putchr)(p, '\n');
      for (i = 0; i < p->indent; ++i)
-	  p->putchr(p, ' ');
+	  LORELIB_CFI_26(p->putchr)(p, ' ');
 }
 
 static const char *digits = "0123456789abcdef";
@@ -50,7 +108,7 @@ static void putint(printer *p, INT i)
      char *f = buf;
 
      if (i < 0) {
-	  p->putchr(p, '-');
+	  LORELIB_CFI_26(p->putchr)(p, '-');
 	  i = -i;
      }
      
@@ -60,7 +118,7 @@ static void putint(printer *p, INT i)
      } while (i);
      
      do {
-	  p->putchr(p, *--f);
+	  LORELIB_CFI_26(p->putchr)(p, *--f);
      } while (f != buf);
 }
 
@@ -75,12 +133,12 @@ static void putulong(printer *p, unsigned long i, unsigned base, int width)
      } while (i);
 
      while (width > f - buf) {
-	  p->putchr(p, '0');
+	  LORELIB_CFI_26(p->putchr)(p, '0');
 	  --width;
      }
 
      do {
-	  p->putchr(p, *--f);
+	  LORELIB_CFI_26(p->putchr)(p, *--f);
      } while (f != buf);
 }
 
@@ -103,7 +161,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 		       }
 		       case 'c': {
 			    int x = va_arg(ap, int);
-			    p->putchr(p, (char)x);
+			    LORELIB_CFI_26(p->putchr)(p, (char)x);
 			    break;
 		       }
 		       case 's': {
@@ -136,12 +194,12 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    /* integer option.  Usage: %oNAME= */
 			    ival = va_arg(ap, INT);
 			    if (ival)
-				 p->putchr(p, '/');
+				 LORELIB_CFI_26(p->putchr)(p, '/');
 			    while ((c = *s++) != '=')
 				 if (ival)
-				      p->putchr(p, c);
+				      LORELIB_CFI_26(p->putchr)(p, c);
 			    if (ival) {
-				 p->putchr(p, '=');
+				 LORELIB_CFI_26(p->putchr)(p, '=');
 				 goto putival;
 			    }
 			    break;
@@ -171,7 +229,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    /* print plan */
 			    plan *x = va_arg(ap, plan *);
 			    if (x) 
-				 x->adt->print(x, p);
+				 LORELIB_CFI_8(x->adt->print)(x, p);
 			    else 
 				 goto putnull;
 			    break;
@@ -180,7 +238,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 			    /* print problem */
 			    problem *x = va_arg(ap, problem *);
 			    if (x)
-				 x->adt->print(x, p);
+				 LORELIB_CFI_11(x->adt->print)(x, p);
 			    else
 				 goto putnull;
 			    break;
@@ -208,7 +266,7 @@ static void vprint(printer *p, const char *format, va_list ap)
 		   }
 		   break;
 	      default:
-		   p->putchr(p, c);
+		   LORELIB_CFI_26(p->putchr)(p, c);
 		   break;
           }
      }
@@ -239,6 +297,12 @@ printer *X(mkprinter)(size_t size,
 void X(printer_destroy)(printer *p)
 {
      if (p->cleanup)
-	  p->cleanup(p);
+	  LORELIB_CFI_25(p->cleanup)(p);
      X(ifree)(p);
 }
+
+//
+// Original code end
+//
+
+

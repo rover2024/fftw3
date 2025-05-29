@@ -1,3 +1,61 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'rader__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: void (const struct plan_s *, double *, double *, double *, double *)
+#define LORELIB_CFI_7(FP) LORELIB_CFI(7, FP)
+
+// decl: void (struct printer_s *, char)
+#define LORELIB_CFI_26(FP) LORELIB_CFI(26, FP)
+
+// decl: void (struct printer_s *, const char *, ...)
+#define LORELIB_CFI_27(FP) LORELIB_CFI(27, FP)
+
+// decl: void (struct triggen_s *, long, double *)
+#define LORELIB_CFI_31(FP) LORELIB_CFI(31, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -60,14 +118,14 @@ static R *mkomega(enum wakefulness wakefulness, plan *p_, INT n, INT ginv)
      t = X(mktriggen)(wakefulness, n);
      for (i = 0, gpower = 1; i < n-1; ++i, gpower = MULMOD(gpower, ginv, n)) {
 	  trigreal w[2];
-	  t->cexpl(t, gpower, w);
+	  LORELIB_CFI_31(t->cexpl)(t, gpower, w);
 	  omega[2*i] = w[0] / scale;
 	  omega[2*i+1] = FFT_SIGN * w[1] / scale;
      }
      X(triggen_destroy)(t);
      A(gpower == 1);
 
-     p->apply(p_, omega, omega + 1, omega, omega + 1);
+     LORELIB_CFI_7(p->apply)(p_, omega, omega + 1, omega, omega + 1);
 
      X(rader_tl_insert)(n, n, ginv, omega, &omegas);
      return omega;
@@ -116,7 +174,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      /* compute DFT of buf, storing in output (except DC): */
      {
 	    plan_dft *cld = (plan_dft *) ego->cld1;
-	    cld->apply(ego->cld1, buf, buf+1, ro+os, io+os);
+	    LORELIB_CFI_7(cld->apply)(ego->cld1, buf, buf+1, ro+os, io+os);
      }
 
      /* set output DC component: */
@@ -146,7 +204,7 @@ static void apply(const plan *ego_, R *ri, R *ii, R *ro, R *io)
      /* inverse FFT: */
      {
 	    plan_dft *cld = (plan_dft *) ego->cld2;
-	    cld->apply(ego->cld2, ro+os, io+os, buf, buf+1);
+	    LORELIB_CFI_7(cld->apply)(ego->cld2, ro+os, io+os, buf, buf+1);
      }
      
      /* finally, do inverse permutation to unshuffle the output: */
@@ -201,13 +259,13 @@ static void destroy(plan *ego_)
 static void print(const plan *ego_, printer *p)
 {
      const P *ego = (const P *)ego_;
-     p->print(p, "(dft-rader-%D%ois=%oos=%(%p%)",
+     LORELIB_CFI_27(p->print)(p, "(dft-rader-%D%ois=%oos=%(%p%)",
               ego->n, ego->is, ego->os, ego->cld1);
      if (ego->cld2 != ego->cld1)
-          p->print(p, "%(%p%)", ego->cld2);
+          LORELIB_CFI_27(p->print)(p, "%(%p%)", ego->cld2);
      if (ego->cld_omega != ego->cld1 && ego->cld_omega != ego->cld2)
-          p->print(p, "%(%p%)", ego->cld_omega);
-     p->putchr(p, ')');
+          LORELIB_CFI_27(p->print)(p, "%(%p%)", ego->cld_omega);
+     LORELIB_CFI_26(p->putchr)(p, ')');
 }
 
 static int applicable(const solver *ego_, const problem *p_,
@@ -325,3 +383,9 @@ void X(dft_rader_register)(planner *p)
 {
      REGISTER_SOLVER(p, mksolver());
 }
+
+//
+// Original code end
+//
+
+

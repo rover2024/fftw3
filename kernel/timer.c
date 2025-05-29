@@ -1,3 +1,58 @@
+/****************************************************************************
+** CFI wrapped code from reading C file 'timer__cfic_tmp_new__.c'
+**
+** Created by: Lorelei CFI compiler
+**
+** WARNING! All changes made in this file will be lost!
+*****************************************************************************/
+
+//
+// CFI declarations begin
+//
+enum LoreLib_Constants {
+    LoreLib_CFI_Count = 40,
+};
+
+struct LoreLib_HostLibraryContext {
+    void *AddressBoundary;
+
+    void (*HrtSetThreadCallback)(void *callback);
+    void *HrtPThreadCreate;
+    void *HrtPThreadExit;
+
+    void *CFIs[LoreLib_CFI_Count];
+};
+
+__attribute__((visibility("default"))) struct LoreLib_HostLibraryContext LoreLib_HostLibCtx;
+
+#define LORELIB_CFI(INDEX, FP)                                                                       \
+    ({                                                                                               \
+        typedef __typeof__(FP) _LORELIB_CFI_TYPE;                                                    \
+        void *_lorelib_cfi_ret = (void *) (FP);                                                      \
+        if ((unsigned long) _lorelib_cfi_ret < (unsigned long) LoreLib_HostLibCtx.AddressBoundary) { \
+            LoreLib_HostLibCtx.HrtSetThreadCallback(_lorelib_cfi_ret);                               \
+            _lorelib_cfi_ret = (void *) LoreLib_HostLibCtx.CFIs[INDEX - 1];                          \
+        }                                                                                            \
+        (_LORELIB_CFI_TYPE) _lorelib_cfi_ret;                                                        \
+    })
+
+// decl: double (const struct problem_s *, double, cost_kind)
+#define LORELIB_CFI_1(FP) LORELIB_CFI(1, FP)
+
+// decl: void (const struct plan_s *, const struct problem_s *)
+#define LORELIB_CFI_5(FP) LORELIB_CFI(5, FP)
+
+// decl: void (const struct problem_s *)
+#define LORELIB_CFI_9(FP) LORELIB_CFI(9, FP)
+
+//
+// CFI declarations end
+//
+
+
+//
+// Original code begin
+//
 /*
  * Copyright (c) 2003, 2007-14 Matteo Frigo
  * Copyright (c) 2003, 2007-14 Massachusetts Institute of Technology
@@ -102,7 +157,7 @@ double X(elapsed_since)(const planner *plnr, const problem *p, crude_time t0)
 {
      double t = elapsed_since(t0);
      if (plnr->cost_hook)
-	  t = plnr->cost_hook(p, t, COST_MAX);
+	  t = LORELIB_CFI_1(plnr->cost_hook)(p, t, COST_MAX);
      return t;
 }
 
@@ -133,7 +188,7 @@ typedef crude_time ticks;
 
        t0 = getticks();
        for (i = 0; i < iter; ++i) 
-	    pln->adt->solve(pln, p);
+	    LORELIB_CFI_5(pln->adt->solve)(pln, p);
        t1 = getticks();
        return elapsed(t1, t0);
   }
@@ -146,7 +201,7 @@ typedef crude_time ticks;
        int repeat;
 
        X(plan_awake)(pln, AWAKE_ZERO);
-       p->adt->zero(p);
+       LORELIB_CFI_9(p->adt->zero)(p);
 
   start_over:
        for (iter = 1; iter; iter *= 2) {
@@ -159,7 +214,7 @@ typedef crude_time ticks;
 		 double t = measure(pln, p, iter);
 		 
 		 if (plnr->cost_hook)
-		      t = plnr->cost_hook(p, t, COST_MAX);
+		      t = LORELIB_CFI_1(plnr->cost_hook)(p, t, COST_MAX);
 		 if (t < 0)
 		      goto start_over;
 
@@ -192,3 +247,9 @@ typedef crude_time ticks;
   }
 
 #endif
+
+//
+// Original code end
+//
+
+
